@@ -14,6 +14,41 @@ def make_blob():
     plt.scatter(X[:, 0], X[:, 1], s=30, color = 'gray')
     return plt.show()
 
+def viz_mall(mall, kmeans):
+    centroids = np.array(mall.groupby('cluster')['age', 'annual_income'].mean())
+    cen_x = [i[0] for i in centroids]
+    cen_y = [i[1] for i in centroids]
+    # cen_x = [i[0] for i in kmeans.cluster_centers_]
+    # cen_y = [i[1] for i in kmeans.cluster_centers_]
+    mall['cen_x'] = mall.cluster.map({0:cen_x[0], 1:cen_x[1], 2:cen_x[2]})
+    mall['cen_y'] = mall.cluster.map({0:cen_y[0], 1:cen_y[1], 2:cen_y[2]})
+    colors = ['#DF2020','#2095DF', '#81DF20' ]
+    mall['c'] = mall.cluster.map({0:colors[0], 1:colors[1], 2:colors[2]})
+    #plot scatter chart for Actual species and those predicted by K - Means
+    #specify custom palette for sns scatterplot
+    colors1 = ['#2095DF','#81DF20' ,'#DF2020']
+    customPalette = sns.set_palette(sns.color_palette(colors1))
+    #plot the scatterplots
+    #Define figure (num of rows, columns and size)
+    fig, ax = plt.subplots(nrows=2, ncols=1, figsize=(10,10))
+    # plot ax1 
+    ax1 = plt.subplot(2,1,1) 
+    sns.scatterplot(data = mall, x = 'age', y = 'annual_income', ax = ax1, hue = 'is_male', palette=customPalette)
+    plt.title('Actual Spending Score')
+    #plot ax2
+    ax2 = plt.subplot(2,1,2) 
+    ax2.scatter(mall.age, mall.annual_income, c=mall.c, alpha = 0.6, s=10)
+    ax2.set(xlabel = 'age', ylabel = 'annual_income', title = 'K - Means')
+
+    # plot centroids on  ax2
+    ax2.scatter(cen_x, cen_y, marker='*', c=colors, s=200)
+    
+    mall.drop(columns = ['cen_x', 'cen_y', 'c'], inplace = True)
+    plt.tight_layout()
+    plt.show()
+    
+    
+    
 def viz_iris(iris, kmeans):
     
     centroids = np.array(iris.groupby('cluster')['petal_length', 'sepal_length'].mean())
